@@ -1,0 +1,15 @@
+.footer{
+    color: white;
+    background-color: black;
+}
+.img-footer{
+    height: 10rem;
+    width: 10em;
+    padding: 0.5em;
+    will-change: filter;
+    transition: filter 300ms;
+}
+
+.nav-link{
+    color: white;
+}
