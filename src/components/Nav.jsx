@@ -9,7 +9,7 @@ const Navegacion = () => {
         <Navbar collapseOnSelect expand='lg' className="fs-6 py-0" variant="ligth">
             <Container className="mt-1 mb-1" fluid>
                 <NavbarBrand  href="#home"><img className="logo  me-auto" src={Logo} alt="" /></NavbarBrand>
-                <h1 className="px-3">JOVENES + 26</h1>
+                <h1 className="px-1 fs-5">JOVENES + 26</h1>
                 <NavbarToggle aria-controls={`offcanvasNavbar-expand-lg`} />
                 <NavbarOffcanvas
                 id={`offcanvasNavbar-expand-lg`}
@@ -29,7 +29,7 @@ const Navegacion = () => {
                         <Nav.Link href="#" className='nav-link me-auto'>Nosotros</Nav.Link>
                         <NavLink href="#" className='nav-link'>Usuarios</NavLink>
                         <Nav.Link href="#" className='me-auto nav-link'>Agregar Productos</Nav.Link>
-                        <Nav.Link href="#" className='mx-o nav-link'><Button size="sm" variant="outline-light" className="border-0 " ><i className="fa-solid fa-user fa-xl" style={{color:"#ffffff"}}></i> </Button></Nav.Link>
+                        <Nav.Link href="#" as={Link} to={'/'} className='mx-o nav-link'><Button size="sm" variant="outline-light" className="border-0 " ><i className="fa-solid fa-user fa-xl" style={{color:"#ffffff"}}></i> </Button></Nav.Link>
                         {/*<i className="fa-solid fa-user" style={{color:"#ffffff"}}></i>*/}
                         </Nav>
                     </OffcanvasBody>

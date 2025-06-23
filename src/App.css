@@ -5,7 +5,7 @@
 }
 
 .logo {
-  height: 5em;
+  height: 4em;
   will-change: filter;
   transition: filter 300ms;
 }
@@ -37,4 +37,12 @@
 
 .read-the-docs {
   color: #888;
+}
+
+@media (min-width: 992px){
+  #root {
+  padding-left: 4rem;
+  padding-right: 4rem;
+  width: 100%;
+}
 }
