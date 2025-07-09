@@ -15,9 +15,10 @@ function Login() {
 
   function iniciarLoginEmailPass(e){
       e.preventDefault();
+
       loginEmailPass(usuario,password).then((user)=>{
         login(usuario);
-        navigate('/');
+        navigate('/listaEvangelismo');
         setError('');
       }).catch((error)=>{
             if(error.code == "auth/invalid-credential"){

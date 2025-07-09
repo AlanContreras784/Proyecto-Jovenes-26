@@ -1,0 +1,8 @@
+[
+  {
+    "origin": ["https://prueba-auth1-5a565.web.app/"],
+    "method": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    "maxAgeSeconds": 3600,
+    "responseHeader": ["Content-Type", "Authorization"]
+  }
+]

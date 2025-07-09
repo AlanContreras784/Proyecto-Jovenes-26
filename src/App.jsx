@@ -5,10 +5,10 @@ import Footer from './components/Footer';
 import Login from './components/Login';
 import Registrarse from './components/Registrarse';
 import ListEvangelismo from './components/ListEvangelismo';
-import AgregarEvangelismo from './components/AgregarEvangelismo';
-import EditarEvangelismo from './components/editarEvangelismo';
 import { useAuthContext } from './contexts/AuthContext';
 import { useEffect } from 'react';
+import CrudEvangelismo from './components/CrudEvangelismo';
+import ListUsuarios from './components/ListUsuarios';
 
 function App() {
   const {verificacionLog, admin} = useAuthContext();
@@ -24,8 +24,8 @@ function App() {
           <Route path="/" element={<Login/>} />
           <Route path="/registrarse" element={<Registrarse/>} />
           <Route path="/listaEvangelismo" element={<ListEvangelismo/>} />
-          <Route path="/admin/agregarEvangelismo" element={<AgregarEvangelismo/>} />
-          <Route path="/admin/editarEvangelismo" element={<EditarEvangelismo/>} />
+          <Route path="/admin/crud" element={<CrudEvangelismo/>} />
+          <Route path='/admin/usuarios' element={<ListUsuarios/>}/>
         </Routes>
       </Router>
       <Footer/>
