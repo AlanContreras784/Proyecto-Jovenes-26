@@ -4,6 +4,8 @@ function CardUsuario({ usuario, onEditar, onEliminar }) {
   return (
     <Card className="mb-3 shadow-sm" style={{ maxWidth: "24rem" }}>
       <Card.Img
+        style={{ width: "250px", height:"280px" }}
+        className=""
         variant="top"
         src={usuario.imagen || "https://i.postimg.cc/Rh2g9nkn/usuario_Admin.png"}
         alt={usuario.name}
