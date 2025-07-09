@@ -32,6 +32,7 @@ const CrudPersonas = () => {
   const [fechaEvangelismoTimestamp, setFechaEvangelismoTimestamp] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [editandoId, setEditandoId] = useState(null); // id persona editando o null
+  const [datosEvangelismo, setDatosEvangelismo] = useState(null);
 
   useEffect(() => {
     obtenerPersonas();
@@ -47,22 +48,25 @@ const CrudPersonas = () => {
   };
 
   const obtenerFechaEvangelismo = async () => {
-    const ref = doc(db, "evangelismo", evangelismoId);
-    const snap = await getDoc(ref);
-    if (snap.exists()) {
-      const timestamp = snap.data().dia;
-      setFechaEvangelismoTimestamp(timestamp);
+  const ref = doc(db, "evangelismo", evangelismoId);
+  const snap = await getDoc(ref);
+  if (snap.exists()) {
+    const data = snap.data();
+    setDatosEvangelismo(data); // Guarda todo
 
-      const fecha = new Date(timestamp.seconds * 1000);
-      const strFecha = fecha.toLocaleDateString("es-AR", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
-      setFechaEvangelismo(strFecha);
-    }
-  };
+    const timestamp = data.dia;
+    setFechaEvangelismoTimestamp(timestamp);
+
+    const fecha = new Date(timestamp.seconds * 1000);
+    const strFecha = fecha.toLocaleDateString("es-AR", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+    setFechaEvangelismo(strFecha);
+  }
+};
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -129,27 +133,37 @@ const CrudPersonas = () => {
   };
 
   const exportarPDF = () => {
-    const doc = new jsPDF();
-    doc.setFontSize(16);
-    doc.text(`Personas - Evangelismo del ${fechaEvangelismo}`, 14, 20);
+  const docPDF = new jsPDF();
+  docPDF.setFontSize(16);
+  docPDF.text(`EVANGELISMO ESTACION HOSPITALES SUBTE H - Evangelismo del ${fechaEvangelismo}- MARTES 17:30 Y 18:30HS`, 14, 20);
 
-    const body = personas.map((p) => [
-      p.nombre,
-      p.edad,
-      p.telefono,
-      p.direccion,
-      p.pedidoOracion,
-      p.nota,
-    ]);
+  if (datosEvangelismo) {
+    docPDF.setFontSize(12);
+    docPDF.text(`Obreros: ${datosEvangelismo.cantObreros || 0}`, 14, 30);
+    docPDF.text(`Personas Oradas: ${datosEvangelismo.personasOradas || 0}`, 14, 37);
+    docPDF.text(`Pedidos de Oración: ${datosEvangelismo.pedidosOracion || 0}`, 14, 44);
+    docPDF.text(`Decisiones: ${datosEvangelismo.decisiones || 0}`, 14, 51);
+    docPDF.text(`Comentarios: ${datosEvangelismo.comentarios || "-"}`, 14, 58);
+  }
 
-    autoTable(doc, {
-      startY: 30,
-      head: [["Nombre", "Edad", "Teléfono", "Dirección", "Pedido", "Nota"]],
-      body,
-    });
+  const body = personas.map((p) => [
+    p.nombre,
+    p.edad,
+    p.telefono,
+    p.direccion,
+    p.pedidoOracion,
+    p.nota,
+  ]);
 
-    doc.save(`personas_${fechaEvangelismo}.pdf`);
-  };
+  autoTable(docPDF, {
+    startY: 70,
+    head: [["Nombre", "Edad", "Teléfono", "Dirección", "Pedido", "Nota"]],
+    body,
+  });
+
+  docPDF.save(`personas_${fechaEvangelismo}.pdf`);
+};
+
 
   return (
     <Container className="mt-4">
