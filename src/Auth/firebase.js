@@ -2,6 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 //import { getAnalytics } from "firebase/analytics";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, getFirestore, setDoc, Timestamp, updateDoc } from "firebase/firestore";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -20,7 +21,9 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 //const analytics = getAnalytics(app);
+const db = getFirestore(app);
 
+export { db };
 
 
 //////////////////////////////////////////////////////////////////////
@@ -109,9 +112,6 @@ export function logearG(){
 ///////////////////// BASE DE DATOS FIRESTORE USUARIOS ////////////////
 ////////////////////////////////////////////////////////////////
 
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, getFirestore, setDoc, Timestamp } from "firebase/firestore";
-
-const db = getFirestore(app);
 
 export function crearUsuarioEnFirebase(uid, name, imagen, age, email, country) {
     return new Promise(async (res, rej) => {
@@ -372,3 +372,88 @@ export function eliminarEvangelismo(id){
         })
     )
 }
+
+
+
+////////////////////////////////////////////////////////////////
+///////////////////// BASE DE DATOS FIRESTORE PERSONAS ////////////////
+////////////////////////////////////////////////////////////////
+
+
+export async function obtenerPersonasFirebase() {
+const snapshot = await getDocs(collection(db, "personas"));
+return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+}
+
+export async function crearPersonaEnFirebase(data) {
+return await addDoc(collection(db, "personas"), data);
+}
+
+export async function editarPersonaEnFirebase(data) {
+const ref = doc(db, "personas", data.id);
+const copia = { ...data };
+delete copia.id;
+return await updateDoc(ref, copia);
+}
+
+export async function eliminarPersonaFirebase(id) {
+return await deleteDoc(doc(db, "personas", id));
+}
+
+export async function obtenerUnaPersonaFirebase(id) {
+const snap = await getDoc(doc(db, "personas", id));
+return { id: snap.id, ...snap.data() };
+}
+
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////
+///////////////////// BASE DE DATOS FIRESTORE PERSONAS POR FECHA ////////////////
+//////////////////////////////////////////////////////////////////////////////////
+
+export async function obtenerEvangelismosConFecha() {
+  const snap = await getDocs(collection(db, "evangelismo"));
+  return snap.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  }));
+}
+
+
+
+
+// Función para comparar fechas ignorando la hora
+const sonMismasFechas = (timestamp, fechaString) => {
+  const fechaEvangelismo = new Date(timestamp.seconds * 1000);
+  const yyyy = fechaEvangelismo.getFullYear();
+  const mm = String(fechaEvangelismo.getMonth() + 1).padStart(2, "0");
+  const dd = String(fechaEvangelismo.getDate()).padStart(2, "0");
+  const fechaFormateada = `${yyyy}-${mm}-${dd}`;
+  return fechaFormateada === fechaString;
+};
+
+export async function obtenerPersonasPorFecha(fechaYYYYMMDD) {
+  const evangelismoSnap = await getDocs(collection(db, "evangelismo"));
+  const personasTotales = [];
+
+  for (const docEvangelismo of evangelismoSnap.docs) {
+    const evangelismoData = docEvangelismo.data();
+
+    if (sonMismasFechas(evangelismoData.dia, fechaYYYYMMDD)) {
+      const personasSnap = await getDocs(collection(db, "evangelismo", docEvangelismo.id, "personas"));
+      personasSnap.forEach((doc) => {
+        personasTotales.push({
+          id: doc.id,
+          evangelismoId: docEvangelismo.id,
+          ...doc.data()
+        });
+      });
+    }
+  }
+
+  return personasTotales;
+}
+
+

@@ -5,6 +5,9 @@ import { useNavigate } from "react-router-dom";
 import {dispararSweetAlertBasico, dispararSweetAlertTrueFalse} from "../assets/SweetAlert";
 import { useEvangelismoContext } from "../contexts/EvangelismoContext";
 import { Timestamp } from "firebase/firestore";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+
 
 const formInicial = {
   dia: "",
@@ -177,10 +180,38 @@ const CrudEvangelismo = () => {
   if (cargando) return <p>Cargando registros...</p>;
   if (error) return <p>{error}</p>;
 
+const exportarPDF = () => {
+  const doc = new jsPDF();
+
+  doc.setFontSize(18);
+  doc.text("Reporte de Evangelismo", 14, 20);
+
+  const body = registros.map((item) => [
+    timestampToDateInputValue(item.dia).replace(/-/g, '/'),
+    item.cantObreros,
+    item.personasOradas,
+    item.pedidosOracion,
+    item.decisiones,
+    item.comentarios || '',
+  ]);
+
+  autoTable(doc, {
+    startY: 30,
+    head: [['Día', 'Obreros', 'Oradas', 'Pedidos', 'Decisiones', 'Comentarios']],
+    body,
+  });
+
+  doc.save("evangelismo.pdf");
+};
+
+
+
+
   return (
     <Container className="mt-4">
       <h2>CRUD de Evangelismo</h2>
       <Button className="mb-3" onClick={() => handleShow()}>Agregar Registro</Button>
+      <Button variant="secondary" className="mb-3 ms-2" onClick={exportarPDF}>Exportar a PDF</Button>
       <Table striped bordered hover responsive className="mt-3">
         <thead>
           <tr>
@@ -205,6 +236,13 @@ const CrudEvangelismo = () => {
               <td>
                 <Button size="sm" onClick={() => handleShow(item)}>Editar</Button>{' '}
                 <Button size="sm" variant="danger" onClick={() => dispararEliminar(item.id)}>Eliminar</Button>
+                <Button
+                    size="sm"
+                    variant="primary"
+                    onClick={() => navigate(`/evangelismo/${item.id}/personas`)}
+                  >Personas
+                </Button>
+                  
               </td>
             </tr>
           ))}

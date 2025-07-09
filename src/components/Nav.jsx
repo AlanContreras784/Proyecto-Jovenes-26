@@ -44,8 +44,9 @@ const Navegacion = () => {
                     <OffcanvasBody>
                         <Nav className="justify-content-end  flex-grow-1 pe-3">
                         {user? <Nav.Link href="#"  as={Link} to={'/listaEvangelismo'}>Registros</Nav.Link>: <></>}
-                        { admin? <Nav.Link href="#" as={Link} to={'/admin/crud'} className=' nav-link'>Crud de Registros</Nav.Link> : <></>}
+                        { admin? <Nav.Link href="#" as={Link} to={'/admin/crud'} className=' nav-link'>Registrar Evangelismo</Nav.Link> : <></>}
                         { admin? <Nav.Link href="#" as={Link} to={'/admin/usuarios'} className=' nav-link'>Usuarios</Nav.Link> : <></>}
+                        <Nav.Link href="#"  as={Link} to={'/personasfechas'}>Personas</Nav.Link>
                         <Nav.Link href="#" as={Link} to={'/'} className='mx-0 ms-0 nav-link'><Button size="sm" variant="outline-light" className="border-0 " onClick={ !user ? handleNavigateLogin : handleLogout}>{ !user ? <i className="fa-solid fa-user fa-xl" style={{color:"#000000"}}></i> : <span size="sm" variant="outline-light" className="border-boton p-1" style={{color:"#000000"}}><i className="fa-solid fa-user"></i> : {obtenerUsername(user)}</span>}</Button></Nav.Link>
                         </Nav>
                     </OffcanvasBody>
