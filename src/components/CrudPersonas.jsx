@@ -134,17 +134,11 @@ const CrudPersonas = () => {
 
   const exportarPDF = () => {
   const docPDF = new jsPDF();
-  docPDF.setFontSize(16);
-  docPDF.text(`EVANGELISMO ESTACION HOSPITALES SUBTE H - Evangelismo del ${fechaEvangelismo}- MARTES 17:30 Y 18:30HS`, 14, 20);
+  const horaActual = new Date().toLocaleString("es-AR");
 
-  if (datosEvangelismo) {
-    docPDF.setFontSize(12);
-    docPDF.text(`Obreros: ${datosEvangelismo.cantObreros || 0}`, 14, 30);
-    docPDF.text(`Personas Oradas: ${datosEvangelismo.personasOradas || 0}`, 14, 37);
-    docPDF.text(`Pedidos de Oración: ${datosEvangelismo.pedidosOracion || 0}`, 14, 44);
-    docPDF.text(`Decisiones: ${datosEvangelismo.decisiones || 0}`, 14, 51);
-    docPDF.text(`Comentarios: ${datosEvangelismo.comentarios || "-"}`, 14, 58);
-  }
+  docPDF.setFontSize(14);
+  docPDF.text("EVANGELISMO ESTACIÓN HOSPITALES SUBTE H", 14, 20);
+  docPDF.text(`Evangelismo del ${fechaEvangelismo} - MARTES 17:30 Y 18:30HS`, 14, 28);
 
   const body = personas.map((p) => [
     p.nombre,
@@ -156,13 +150,36 @@ const CrudPersonas = () => {
   ]);
 
   autoTable(docPDF, {
-    startY: 70,
+    startY: 35,
     head: [["Nombre", "Edad", "Teléfono", "Dirección", "Pedido", "Nota"]],
     body,
+    didDrawPage: (data) => {
+      const pageHeight = docPDF.internal.pageSize.height;
+      const leftX = 14;
+      const rightX = 100;
+      const baseY = pageHeight - 30;
+
+      docPDF.setFontSize(14);
+
+      if (datosEvangelismo) {
+        docPDF.text(`Obreros: ${datosEvangelismo.cantObreros || 0}`, leftX, baseY);
+        docPDF.text(`Pedidos de Oración: ${datosEvangelismo.pedidosOracion || 0}`, rightX, baseY);
+
+        docPDF.text(`Personas Oradas: ${datosEvangelismo.personasOradas || 0}`, leftX, baseY + 6);
+        docPDF.text(`Decisiones: ${datosEvangelismo.decisiones || 0}`, rightX, baseY + 6);
+
+        docPDF.text(`Comentarios: ${datosEvangelismo.comentarios || "-"}`, leftX, baseY + 12);
+      }
+
+      docPDF.setFontSize(8);
+      docPDF.text(`PDF generado el ${horaActual}`, leftX, pageHeight - 10);
+    },
   });
 
   docPDF.save(`personas_${fechaEvangelismo}.pdf`);
 };
+
+
 
 
   return (
