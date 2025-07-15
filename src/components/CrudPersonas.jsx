@@ -14,6 +14,7 @@ import {
 import { Button, Container, Form, Table, Modal } from "react-bootstrap";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import Logo from "../assets/img/Logo_Jovenes+26.jpeg";
 
 const formInicial = {
   nombre: "",
@@ -132,13 +133,51 @@ const CrudPersonas = () => {
     }
   };
 
-  const exportarPDF = () => {
+  //////////////////////CONVERTIR LA IMAGEN DEL LOGO A BASE 64 PARA PODER IMPRIMIR////////////////////////
+  const getImageBase64 = (url) => {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.src = url;
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0);
+      resolve(canvas.toDataURL("image/png"));
+    };
+    img.onerror = reject;
+  });
+};
+
+
+//////////////////////////////FUNCION PARA IMPRMIR EN FORMATO PDF///////////////////////////////////////
+
+  const exportarPDF = async () => {
   const docPDF = new jsPDF();
   const horaActual = new Date().toLocaleString("es-AR");
 
+  // Convertir imagen importada a base64
+  const logoBase64 = await getImageBase64(Logo);
+
+  // Ajustar logo: (x, y, width, height)
+  const logoWidth = 20;
+  const logoHeight = 20;
+  const logoX = 10;
+  const logoY = 10;
+
+  // Insertar logo en la esquina superior izquierda
+  docPDF.addImage(logoBase64, "PNG", logoX, logoY, logoWidth, logoHeight);
+
+  // Texto alineado a la derecha del logo
+  const textoX = logoX + logoWidth + 5; // 5px de espacio
+  const textoY1 = logoY + 7; // centrado verticalmente con el logo
+  const textoY2 = textoY1 + 8;
+
   docPDF.setFontSize(14);
-  docPDF.text("EVANGELISMO ESTACIÓN HOSPITALES SUBTE H", 14, 20);
-  docPDF.text(`Evangelismo del ${fechaEvangelismo} - MARTES 17:30 Y 18:30HS`, 14, 28);
+  docPDF.text("EVANGELISMO ESTACIÓN HOSPITALES SUBTE H ", textoX, textoY1);
+  docPDF.text(`Evangelismo del ${fechaEvangelismo} - MARTES 17:30 Y 18:30HS`, textoX, textoY2);
 
   const body = personas.map((p) => [
     p.nombre,
@@ -150,7 +189,7 @@ const CrudPersonas = () => {
   ]);
 
   autoTable(docPDF, {
-    startY: 35,
+    startY: logoY + logoHeight + 10, // iniciar debajo del logo
     head: [["Nombre", "Edad", "Teléfono", "Dirección", "Pedido", "Nota"]],
     body,
     didDrawPage: (data) => {
@@ -164,10 +203,8 @@ const CrudPersonas = () => {
       if (datosEvangelismo) {
         docPDF.text(`Obreros: ${datosEvangelismo.cantObreros || 0}`, leftX, baseY);
         docPDF.text(`Pedidos de Oración: ${datosEvangelismo.pedidosOracion || 0}`, rightX, baseY);
-
         docPDF.text(`Personas Oradas: ${datosEvangelismo.personasOradas || 0}`, leftX, baseY + 6);
         docPDF.text(`Decisiones: ${datosEvangelismo.decisiones || 0}`, rightX, baseY + 6);
-
         docPDF.text(`Comentarios: ${datosEvangelismo.comentarios || "-"}`, leftX, baseY + 12);
       }
 
@@ -178,6 +215,7 @@ const CrudPersonas = () => {
 
   docPDF.save(`personas_${fechaEvangelismo}.pdf`);
 };
+
 
 
 
