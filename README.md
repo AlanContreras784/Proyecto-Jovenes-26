@@ -49,7 +49,7 @@ src/
 1. Clona este repositorio:
 
 ```bash
-git clone https://github.com/AlanContreras784/PROYECTO-TT-REACT-JS.git
+git clone https://github.com/AlanContreras784/Proyecto-Jovenes-26
 ```
 
 2. Instala las dependencias:
