@@ -38,6 +38,7 @@ const ListEvangelismo = () => {
         <thead>
           <tr>
             <th>Día</th>
+            <th>Lugar </th>
             <th>Obreros</th>
             <th>Oradas</th>
             <th>Pedidos</th>
@@ -49,6 +50,7 @@ const ListEvangelismo = () => {
           {evangelismoOrdenado.map((item) => (
             <tr key={item.id}>
               <td>{new Date(item.dia.seconds * 1000).toLocaleDateString("es-AR")}</td>
+              <td>{item.lugarEvangelismo}</td>
               <td>{item.cantObreros}</td>
               <td>{item.personasOradas}</td>
               <td>{item.pedidosOracion}</td>

@@ -241,11 +241,12 @@ export function eliminarUsuario(id){
 ///////////////////// BASE DE DATOS FIRESTORE EVANGELISMO ////////////////
 ////////////////////////////////////////////////////////////////
 
-export function crearEvangelismoEnFirebase(dia,cantObreros, pedidosOracion, personasOradas, decisiones,comentarios) {
+export function crearEvangelismoEnFirebase(dia,lugarEvangelismo,cantObreros, pedidosOracion, personasOradas, decisiones,comentarios) {
     return new Promise(async (res, rej) => {
         try {
         const docRef = await addDoc(collection(db, "evangelismo"), {
                 dia: dia,
+                lugarEvangelismo:lugarEvangelismo,
                 cantObreros: cantObreros,
                 pedidosOracion: pedidosOracion,
                 personasOradas: personasOradas,
@@ -276,6 +277,7 @@ export function obtenerRegistrosEvangelismo() {
                         console.log(data, "doc con data extraida")
                         return {
                             id: doc.id,
+                            lugarEvangelismo:data.lugarEvangelismo,
                             cantObreros: data.cantObreros,
                             dia: data.dia,
                             pedidosOracion: data.pedidosOracion,
@@ -306,6 +308,7 @@ export function obtenerEvangelismoEnFirebase(id) {
                         const data = docSnap.data();
                         const evangelismo = {
                             id: docSnap.id,
+                            lugarEvangelismo: data.lugarEvangelismo,
                             cantObreros: data.cantObreros,
                             dia: data.dia,
                             pedidosOracion: data.pedidosOracion,
@@ -342,6 +345,7 @@ export function editarEvangelismo(evangelismo){
                         : typeof evangelismo.dia === "string"
                             ? Timestamp.fromDate(new Date(evangelismo.dia))
                             : evangelismo.dia,
+                    lugarEvangelismo: evangelismo.lugarEvangelismo,
                     cantObreros: evangelismo.cantObreros,
                     pedidosOracion: evangelismo.pedidosOracion,
                     personasOradas: evangelismo.personasOradas,
@@ -358,21 +362,26 @@ export function editarEvangelismo(evangelismo){
     )
 }
 
-export function eliminarEvangelismo(id){
-    return(
-        new Promise(async(res, rej) => {
-            try{
-                await deleteDoc(doc(db, "evangelismo", id))
-                res()
-            }catch (e){
-                console.error("Error adding document: ", e);
-                rej(e)
-            }
+export async function eliminarEvangelismo(id) {
+    try {
+        const personasRef = collection(db, "evangelismo", id, "personas");
+        const snapshot = await getDocs(personasRef);
 
-        })
-    )
+        // Borrar cada persona dentro del evangelismo
+        const eliminaciones = snapshot.docs.map((docPersona) =>
+        deleteDoc(docPersona.ref)
+        );
+        await Promise.all(eliminaciones); // Espera que se borren todas las personas
+
+        // Luego borra el evangelismo
+        await deleteDoc(doc(db, "evangelismo", id));
+
+        return Promise.resolve();
+    } catch (e) {
+        console.error("Error al eliminar evangelismo y subcolección:", e);
+        return Promise.reject(e);
+    }
 }
-
 
 
 ////////////////////////////////////////////////////////////////
@@ -381,28 +390,28 @@ export function eliminarEvangelismo(id){
 
 
 export async function obtenerPersonasFirebase() {
-const snapshot = await getDocs(collection(db, "personas"));
-return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    const snapshot = await getDocs(collection(db, "personas"));
+    return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 }
 
 export async function crearPersonaEnFirebase(data) {
-return await addDoc(collection(db, "personas"), data);
+    return await addDoc(collection(db, "personas"), data);
 }
 
 export async function editarPersonaEnFirebase(data) {
-const ref = doc(db, "personas", data.id);
-const copia = { ...data };
-delete copia.id;
-return await updateDoc(ref, copia);
+    const ref = doc(db, "personas", data.id);
+    const copia = { ...data };
+    delete copia.id;
+    return await updateDoc(ref, copia);
 }
 
 export async function eliminarPersonaFirebase(id) {
-return await deleteDoc(doc(db, "personas", id));
+    return await deleteDoc(doc(db, "personas", id));
 }
 
 export async function obtenerUnaPersonaFirebase(id) {
-const snap = await getDoc(doc(db, "personas", id));
-return { id: snap.id, ...snap.data() };
+    const snap = await getDoc(doc(db, "personas", id));
+    return { id: snap.id, ...snap.data() };
 }
 
 
@@ -414,11 +423,11 @@ return { id: snap.id, ...snap.data() };
 //////////////////////////////////////////////////////////////////////////////////
 
 export async function obtenerEvangelismosConFecha() {
-  const snap = await getDocs(collection(db, "evangelismo"));
-  return snap.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  }));
+    const snap = await getDocs(collection(db, "evangelismo"));
+    return snap.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+    }));
 }
 
 
@@ -426,34 +435,34 @@ export async function obtenerEvangelismosConFecha() {
 
 // Función para comparar fechas ignorando la hora
 const sonMismasFechas = (timestamp, fechaString) => {
-  const fechaEvangelismo = new Date(timestamp.seconds * 1000);
-  const yyyy = fechaEvangelismo.getFullYear();
-  const mm = String(fechaEvangelismo.getMonth() + 1).padStart(2, "0");
-  const dd = String(fechaEvangelismo.getDate()).padStart(2, "0");
-  const fechaFormateada = `${yyyy}-${mm}-${dd}`;
-  return fechaFormateada === fechaString;
+    const fechaEvangelismo = new Date(timestamp.seconds * 1000);
+    const yyyy = fechaEvangelismo.getFullYear();
+    const mm = String(fechaEvangelismo.getMonth() + 1).padStart(2, "0");
+    const dd = String(fechaEvangelismo.getDate()).padStart(2, "0");
+    const fechaFormateada = `${yyyy}-${mm}-${dd}`;
+    return fechaFormateada === fechaString;
 };
 
 export async function obtenerPersonasPorFecha(fechaYYYYMMDD) {
-  const evangelismoSnap = await getDocs(collection(db, "evangelismo"));
-  const personasTotales = [];
+    const evangelismoSnap = await getDocs(collection(db, "evangelismo"));
+    const personasTotales = [];
 
-  for (const docEvangelismo of evangelismoSnap.docs) {
-    const evangelismoData = docEvangelismo.data();
+    for (const docEvangelismo of evangelismoSnap.docs) {
+        const evangelismoData = docEvangelismo.data();
 
-    if (sonMismasFechas(evangelismoData.dia, fechaYYYYMMDD)) {
-      const personasSnap = await getDocs(collection(db, "evangelismo", docEvangelismo.id, "personas"));
-      personasSnap.forEach((doc) => {
-        personasTotales.push({
-          id: doc.id,
-          evangelismoId: docEvangelismo.id,
-          ...doc.data()
-        });
-      });
+        if (sonMismasFechas(evangelismoData.dia, fechaYYYYMMDD)) {
+            const personasSnap = await getDocs(collection(db, "evangelismo", docEvangelismo.id, "personas"));
+            personasSnap.forEach((doc) => {
+            personasTotales.push({
+                id: doc.id,
+                evangelismoId: docEvangelismo.id,
+                ...doc.data()
+            });
+            });
+        }
     }
-  }
 
-  return personasTotales;
+    return personasTotales;
 }
 
 

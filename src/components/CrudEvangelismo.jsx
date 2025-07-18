@@ -18,6 +18,7 @@ import Logo from "../assets/img/logo_jovenes+26_fondoBlanco.jpeg"; // Logo váli
 // Estado inicial para el formulario
 const formInicial = {
   dia: "",
+  lugarEvangelismo:"",
   cantObreros: "",
   pedidosOracion: "",
   personasOradas: "",
@@ -163,6 +164,7 @@ const CrudEvangelismo = () => {
       setForm({
         ...evangelismoSeleccionado,
         dia: timestampToDateInputValue(evangelismoSeleccionado.dia),
+        lugarEvangelismo: evangelismoSeleccionado.lugarEvangelismo || "",
         cantObreros: Number(evangelismoSeleccionado.cantObreros),
         pedidosOracion: Number(evangelismoSeleccionado.pedidosOracion),
         personasOradas: Number(evangelismoSeleccionado.personasOradas),
@@ -204,6 +206,7 @@ const CrudEvangelismo = () => {
         await editarEvangelismo({
           id: editId,
           dia: timestampDia,
+          lugarEvangelismo: form.lugarEvangelismo,
           cantObreros: Number(form.cantObreros),
           pedidosOracion: Number(form.pedidosOracion),
           personasOradas: Number(form.personasOradas),
@@ -216,11 +219,12 @@ const CrudEvangelismo = () => {
         // Nuevo registro
         await crearEvangelismoEnFirebase(
           timestampDia,
+          form.lugarEvangelismo,
           Number(form.cantObreros),
           Number(form.pedidosOracion),
           Number(form.personasOradas),
           Number(form.decisiones),
-          form.comentarios
+          form.comentarios,
         );
 
         dispararSweetAlertBasico("Agregado exitosamente", "", "success", "Confirmar");
@@ -230,7 +234,7 @@ const CrudEvangelismo = () => {
       handleClose();
       const nuevosDatos = await obtenerEvangelismosFirebase();
       setRegistros(nuevosDatos);
-      navigate("/listaEvangelismo");
+      navigate("/admin/crud");
     } catch (error) {
       console.error("Error al guardar:", error);
       dispararSweetAlertBasico("Error", "No se pudo guardar el registro", "error", "Cerrar");
@@ -301,7 +305,7 @@ const CrudEvangelismo = () => {
       secciones.push([
         {
           content: ` ${mes.toUpperCase()}`,
-          colSpan: 6,
+          colSpan: 7,
           styles: {
             halign: "left",
             fontStyle: "bold",
@@ -315,6 +319,7 @@ const CrudEvangelismo = () => {
         const strFecha = fecha.toLocaleDateString("es-AR").replace(/\//g, "/");
         secciones.push([
           strFecha,
+          item.lugarEvangelismo,
           item.cantObreros,
           item.personasOradas,
           item.pedidosOracion,
@@ -325,53 +330,57 @@ const CrudEvangelismo = () => {
     }
 
     // Tabla principal con registros
-    autoTable(doc, {
-      startY: logoY + logoHeight + 10,
-      head: [["Día", "Obreros", "Oradas", "Pedidos", "Decisiones", "Comentarios"]],
-      body: secciones,
-      styles: { fontSize: 10 },
-      headStyles: {
-        fillColor: [0, 102, 204],
-        textColor: 255,
-        halign: "center",
-      },
-      alternateRowStyles: { fillColor: [240, 240, 240] },
-      margin: { top: 35, bottom: 30 },
-      didDrawPage: (data) => {
-        // Agregar logo en cada página
-        doc.addImage(logoBase64, "PNG", logoX, logoY, logoWidth, logoHeight);
+  autoTable(doc, {
+    startY: logoY + logoHeight + 10,
+    head: [["Día","Lugar Evangelismo", "Obreros", "Personas Oradas", "Pedidos", "Decisiones", "Comentarios"]],
+    body: secciones,
+    styles: { 
+      fontSize: 10,
+      halign: "center"   // <-- centra contenido de todas las celdas
+    },
+    headStyles: {
+      fillColor: [0, 102, 204],
+      textColor: 255,
+      halign: "center",  // <-- centra encabezados
+    },
+    alternateRowStyles: { fillColor: [240, 240, 240] },
+    margin: { top: 35, bottom: 30 },
+    didDrawPage: (data) => {
+      // Agregar logo en cada página
+      doc.addImage(logoBase64, "PNG", logoX, logoY, logoWidth, logoHeight);
 
-        // Título centrado
-        doc.setFontSize(16);
-        doc.setTextColor(0);
-        doc.text("Reporte de Evangelismo", doc.internal.pageSize.getWidth() / 2, tituloY, {
-          align: "center",
-        });
+      // Título centrado
+      doc.setFontSize(16);
+      doc.setTextColor(0);
+      doc.text("Reporte de Evangelismos", doc.internal.pageSize.getWidth() / 2, tituloY, {
+        align: "center",
+      });
 
-        // Subtítulo con fecha de exportación
-        doc.setFontSize(10);
-        doc.setTextColor(100);
-        doc.text(
-          "EVANGELISMO ESTACIÓN HOSPITALES SUBTE H - MARTES 17:30 Y 18:30HS",
-          doc.internal.pageSize.getWidth() / 2,
-          subtituloY - 5,
-          { align: "center" }
-        );
-        doc.text(`Exportado el ${fechaHoraActual}`, doc.internal.pageSize.getWidth() / 2, subtituloY, {
-          align: "center",
-        });
+      // Subtítulo con fecha de exportación
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text(
+        `EVANGELISMO  JOVENES+26 - MARTES Y VIERNES 17:30 Y 18:30HS `,
+        doc.internal.pageSize.getWidth() / 2,
+        subtituloY - 5,
+        { align: "center" }
+      );
+      doc.text(`Exportado el ${fechaHoraActual}`, doc.internal.pageSize.getWidth() / 2, subtituloY, {
+        align: "center",
+      });
 
-        // Número de página abajo a la derecha
-        const pageNumber = doc.internal.getNumberOfPages();
-        doc.setFontSize(8);
-        doc.setTextColor(150);
-        doc.text(
-          `Página ${pageNumber}`,
-          doc.internal.pageSize.getWidth() - 20,
-          doc.internal.pageSize.getHeight() - 10
-        );
-      },
-    });
+      // Número de página abajo a la derecha
+      const pageNumber = doc.internal.getNumberOfPages();
+      doc.setFontSize(8);
+      doc.setTextColor(150);
+      doc.text(
+        `Página ${pageNumber}`,
+        doc.internal.pageSize.getWidth() - 20,
+        doc.internal.pageSize.getHeight() - 10
+      );
+    },
+  });
+
 
     // Tabla resumen mensual con totales
     const resumen = generarResumenMensual(registrosPorMes);
@@ -380,11 +389,15 @@ const CrudEvangelismo = () => {
       startY: doc.lastAutoTable.finalY + 10,
       head: [["Mes", "Total Obreros", "Total Oradas", "Total Pedidos", "Total Decisiones"]],
       body: resumen,
-      styles: { fontSize: 10 },
+      styles: { 
+        fontSize: 10,
+        halign: "center"   // <-- centrado horizontal de todos los datos
+      },
+      
       headStyles: {
         fillColor: [0, 153, 76],
         textColor: 255,
-        halign: "center",
+        halign: "center",  // <-- centrado de encabezado
       },
       alternateRowStyles: { fillColor: [240, 255, 240] },
     });
@@ -407,7 +420,7 @@ const CrudEvangelismo = () => {
 
   return (
     <Container className="mt-4">
-      <h2> Evangelismo</h2>
+      <h2> -EVANGELISMOS- </h2>
       <Button className="mb-3" onClick={() => handleShow()}>
         Agregar Registro
       </Button>
@@ -418,11 +431,12 @@ const CrudEvangelismo = () => {
         <thead>
           <tr>
             <th>Día</th>
+            <th>Lugar Evangelismo</th>
             <th>Cant. Obreros</th>
             <th>P. Oradas</th>
             <th>Pedidos</th>
             <th>Decisiones</th>
-            <th>Comentarios</th>
+            {/* <th>Comentarios</th> */}
             <th>Acciones</th>
           </tr>
         </thead>
@@ -430,11 +444,12 @@ const CrudEvangelismo = () => {
           {registrosOrdenados?.map((item) => (
             <tr key={item.id}>
               <td>{timestampToDateInputValue(item.dia).replace(/-/g, "/")}</td>
+              <td>{item.lugarEvangelismo}</td>
               <td>{item.cantObreros}</td>
               <td>{item.personasOradas}</td>
               <td>{item.pedidosOracion}</td>
               <td>{item.decisiones}</td>
-              <td>{item.comentarios}</td>
+              {/* <td>{item.comentarios}</td> */}
               <td>
                 <Button size="sm" onClick={() => handleShow(item)}>
                   Editar
@@ -476,6 +491,16 @@ const CrudEvangelismo = () => {
                 required
               />
             </Form.Group>
+            <Form.Group className="mb-2">
+              <Form.Label>Lugar Evangelismo</Form.Label>
+              <Form.Control
+                type="text"
+                name="lugarEvangelismo"
+                value={form.lugarEvangelismo}
+                onChange={handleChange}
+                required
+              />
+              </Form.Group>
 
             <Form.Group className="mb-2">
               <Form.Label>Cant. Obreros</Form.Label>

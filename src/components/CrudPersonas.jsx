@@ -14,7 +14,7 @@ import {
 import { Button, Container, Form, Table, Modal } from "react-bootstrap";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import Logo from "../assets/img/Logo_Jovenes+26.jpeg";
+import Logo from "../assets/img/logo_jovenes+26_fondoBlanco.jpeg";
 
 const formInicial = {
   nombre: "",
@@ -34,6 +34,7 @@ const CrudPersonas = () => {
   const [showModal, setShowModal] = useState(false);
   const [editandoId, setEditandoId] = useState(null); // id persona editando o null
   const [datosEvangelismo, setDatosEvangelismo] = useState(null);
+  const [cargando, setCargando] = useState(false);
 
   useEffect(() => {
     obtenerPersonas();
@@ -95,6 +96,7 @@ const CrudPersonas = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setCargando(true);
     try {
       if (editandoId) {
         // Actualizar persona
@@ -117,6 +119,7 @@ const CrudPersonas = () => {
       setShowModal(false);
       setEditandoId(null);
       obtenerPersonas();
+      setCargando(false);
     } catch (e) {
       console.error("Error al guardar persona:", e);
     }
@@ -154,7 +157,7 @@ const CrudPersonas = () => {
 
 //////////////////////////////FUNCION PARA IMPRMIR EN FORMATO PDF///////////////////////////////////////
 
-  const exportarPDF = async () => {
+const exportarPDF = async () => {
   const docPDF = new jsPDF();
   const horaActual = new Date().toLocaleString("es-AR");
 
@@ -170,46 +173,54 @@ const CrudPersonas = () => {
   // Insertar logo en la esquina superior izquierda
   docPDF.addImage(logoBase64, "PNG", logoX, logoY, logoWidth, logoHeight);
 
-  // Texto alineado a la derecha del logo
-  const textoX = logoX + logoWidth + 5; // 5px de espacio
-  const textoY1 = logoY + 7; // centrado verticalmente con el logo
-  const textoY2 = textoY1 + 8;
+  // Para centrar título y subtítulo, calculamos la mitad del ancho de página
+  const pageWidth = docPDF.internal.pageSize.getWidth();
+  const tituloY = logoY + 7;   // altura para el título
+  const subtituloY = tituloY + 8; // altura para el subtítulo
 
   docPDF.setFontSize(14);
-  docPDF.text("EVANGELISMO ESTACIÓN HOSPITALES SUBTE H ", textoX, textoY1);
-  docPDF.text(`Evangelismo del ${fechaEvangelismo} - MARTES 17:30 Y 18:30HS`, textoX, textoY2);
+  docPDF.text(`LUGAR: ${datosEvangelismo.lugarEvangelismo || 'Lugar no especificado'}`, pageWidth / 2, tituloY, { align: "center" });
+
+  docPDF.setFontSize(12);
+  docPDF.text(`Evangelismo del ${fechaEvangelismo}`, pageWidth / 2, subtituloY, { align: "center" });
 
   const body = personas.map((p) => [
     p.nombre,
-    p.edad,
-    p.telefono,
-    p.direccion,
-    p.pedidoOracion,
-    p.nota,
+    p.edad || "--",
+    p.telefono || "--",
+    p.direccion || "--",
+    p.pedidoOracion || "--",
+    p.nota || "--",
   ]);
 
   autoTable(docPDF, {
     startY: logoY + logoHeight + 10, // iniciar debajo del logo
     head: [["Nombre", "Edad", "Teléfono", "Dirección", "Pedido", "Nota"]],
     body,
+    styles: {
+      halign: "center",  // centra texto en todas las celdas
+      fontSize: 10,
+    },
+    headStyles: {
+      fillColor: [0, 102, 204],
+      textColor: 255,
+      halign: "center",  // centra encabezados
+    },
+    margin: { left: 14, right: 14 },
+
     didDrawPage: (data) => {
       const pageHeight = docPDF.internal.pageSize.height;
-      const leftX = 14;
-      const rightX = 100;
       const baseY = pageHeight - 30;
 
-      docPDF.setFontSize(14);
-
-      if (datosEvangelismo) {
-        docPDF.text(`Obreros: ${datosEvangelismo.cantObreros || 0}`, leftX, baseY);
-        docPDF.text(`Pedidos de Oración: ${datosEvangelismo.pedidosOracion || 0}`, rightX, baseY);
-        docPDF.text(`Personas Oradas: ${datosEvangelismo.personasOradas || 0}`, leftX, baseY + 6);
-        docPDF.text(`Decisiones: ${datosEvangelismo.decisiones || 0}`, rightX, baseY + 6);
-        docPDF.text(`Comentarios: ${datosEvangelismo.comentarios || "-"}`, leftX, baseY + 12);
-      }
+      docPDF.setFontSize(12);
+      // Centramos los datos del evangelismo al final
+      docPDF.text(`Lugar de Evangelismo: ${datosEvangelismo.lugarEvangelismo || "-"}`, pageWidth / 2, baseY, { align: "center" });
+      docPDF.text(`Obreros: ${datosEvangelismo.cantObreros || 0}     -     Personas Oradas: ${datosEvangelismo.personasOradas || 0}`, pageWidth / 2, baseY + 6, { align: "center" });
+      docPDF.text(`Pedidos de Oración: ${datosEvangelismo.pedidosOracion || 0}     -     Decisiones: ${datosEvangelismo.decisiones || 0}`, pageWidth / 2, baseY + 12, { align: "center" });
+      docPDF.text(`Comentarios: ${datosEvangelismo.comentarios || "-"}`, pageWidth / 2, baseY + 18, { align: "center" });
 
       docPDF.setFontSize(8);
-      docPDF.text(`PDF generado el ${horaActual}`, leftX, pageHeight - 10);
+      docPDF.text(`PDF generado el ${horaActual}`, 14, pageHeight - 10);
     },
   });
 
@@ -220,9 +231,10 @@ const CrudPersonas = () => {
 
 
 
+
   return (
     <Container className="mt-4">
-      <h3>Personas - Evangelismo del {fechaEvangelismo}</h3>
+      <h3>{datosEvangelismo?.lugarEvangelismo || ''} - Evangelismo del {fechaEvangelismo}</h3>
 
       <Button className="mb-3" onClick={abrirModalNuevo}>
         Agregar Persona
