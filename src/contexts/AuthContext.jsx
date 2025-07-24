@@ -3,6 +3,7 @@ import Swal from "sweetalert2";
 
 // Crear el contexto de autenticación
 const AuthContext = createContext();
+
 export function AuthProvider({ children }) {
   
   const [user, setUser] = useState(null);
@@ -10,10 +11,11 @@ export function AuthProvider({ children }) {
 
   //--------------------FUNCION INICIAR SESION ------------------------------------
   const login = (username) => {
+    const administrator=import.meta.env.VITE_ADMIN;
     // Simulando la creación de un token (en una app real, esto sería generado por un servidor)
     const token = `fake-token-${username}`;
   
-    if(username==="admin@gmail.com"){ //contraseña : test12
+    if(username===administrator){ //contraseña : test12
         setAdmin(true);
     }
     localStorage.setItem('authToken', token);
@@ -50,8 +52,9 @@ export function AuthProvider({ children }) {
 
   //FUNNCION PARA VERIFICACION DE USUARIO Y ADMIN--------------------------
   function verificacionLog(){
+    const administrator=import.meta.env.VITE_ADMIN;
     const userToken = localStorage.getItem("authToken")
-    if(userToken && userToken == "fake-token-admin@gmail.com"){
+    if(userToken && userToken == `fake-token-${administrator}`){
       setAdmin(true)
       setUser(userToken)
       return
