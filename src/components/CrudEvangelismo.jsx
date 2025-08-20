@@ -14,7 +14,11 @@ import { Timestamp } from "firebase/firestore";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import Logo from "../assets/img/logo_jovenes+26_fondoBlanco.jpeg"; // Logo válido
-
+import { FaEdit } from "react-icons/fa";
+import { FaRegTrashAlt } from "react-icons/fa";
+import { IoMdPersonAdd } from "react-icons/io";
+import { FaFileDownload } from "react-icons/fa";
+import { MdFormatListBulletedAdd } from "react-icons/md";
 // Estado inicial para el formulario
 const formInicial = {
   dia: "",
@@ -421,11 +425,11 @@ const CrudEvangelismo = () => {
   return (
     <Container className="mt-4">
       <h2> -EVANGELISMOS- </h2>
-      <Button className="mb-3" onClick={() => handleShow()}>
-        Agregar Registro
+      <Button title="Agregar Registro" className="mb-3" onClick={() => handleShow()}>
+        Agregar <MdFormatListBulletedAdd size={24} />
       </Button>
-      <Button variant="secondary" className="mb-3 ms-2" onClick={exportarPDF}>
-        Exportar a PDF
+      <Button title="Descargar PDF" variant="secondary" className="mb-3 ms-2" onClick={exportarPDF}>
+        Descargar <FaFileDownload size={24} />
       </Button>
       <Table striped bordered hover responsive className="mt-3">
         <thead>
@@ -451,22 +455,22 @@ const CrudEvangelismo = () => {
               <td>{item.decisiones}</td>
               {/* <td>{item.comentarios}</td> */}
               <td>
-                <Button size="sm" onClick={() => handleShow(item)}>
-                  Editar
+                <Button title="Editar" className="mb-1" size="sm" onClick={() => handleShow(item)}>
+                  <FaEdit size={18} />
                 </Button>{" "}
-                <Button
+                <Button title="Eliminar" className="mb-1"
                   size="sm"
                   variant="danger"
                   onClick={() => dispararEliminar(item.id)}
                 >
-                  Eliminar
-                </Button>
-                <Button
+                  <FaRegTrashAlt size={18} />
+                </Button>{" "}
+                <Button title="Add Persons"
                   size="sm"
-                  variant="primary"
+                  variant="success"
                   onClick={() => navigate(`/evangelismo/${item.id}/personas`)}
                 >
-                  Personas
+                  <IoMdPersonAdd size={18} />
                 </Button>
               </td>
             </tr>

@@ -15,6 +15,10 @@ import { Button, Container, Form, Table, Modal } from "react-bootstrap";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import Logo from "../assets/img/logo_jovenes+26_fondoBlanco.jpeg";
+import { FaEdit } from "react-icons/fa";
+import { FaRegTrashAlt } from "react-icons/fa";
+import { FaFileDownload } from "react-icons/fa";
+import { IoMdPersonAdd } from "react-icons/io";
 
 const formInicial = {
   nombre: "",
@@ -50,25 +54,25 @@ const CrudPersonas = () => {
   };
 
   const obtenerFechaEvangelismo = async () => {
-  const ref = doc(db, "evangelismo", evangelismoId);
-  const snap = await getDoc(ref);
-  if (snap.exists()) {
-    const data = snap.data();
-    setDatosEvangelismo(data); // Guarda todo
+    const ref = doc(db, "evangelismo", evangelismoId);
+    const snap = await getDoc(ref);
+    if (snap.exists()) {
+      const data = snap.data();
+      setDatosEvangelismo(data); // Guarda todo
 
-    const timestamp = data.dia;
-    setFechaEvangelismoTimestamp(timestamp);
+      const timestamp = data.dia;
+      setFechaEvangelismoTimestamp(timestamp);
 
-    const fecha = new Date(timestamp.seconds * 1000);
-    const strFecha = fecha.toLocaleDateString("es-AR", {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-    setFechaEvangelismo(strFecha);
-  }
-};
+      const fecha = new Date(timestamp.seconds * 1000);
+      const strFecha = fecha.toLocaleDateString("es-AR", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+      setFechaEvangelismo(strFecha);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -138,94 +142,94 @@ const CrudPersonas = () => {
 
   //////////////////////CONVERTIR LA IMAGEN DEL LOGO A BASE 64 PARA PODER IMPRIMIR////////////////////////
   const getImageBase64 = (url) => {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.src = url;
-    img.onload = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0);
-      resolve(canvas.toDataURL("image/png"));
-    };
-    img.onerror = reject;
-  });
-};
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.src = url;
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+        resolve(canvas.toDataURL("image/png"));
+      };
+      img.onerror = reject;
+    });
+  };
 
 
-//////////////////////////////FUNCION PARA IMPRMIR EN FORMATO PDF///////////////////////////////////////
+  //////////////////////////////FUNCION PARA IMPRMIR EN FORMATO PDF///////////////////////////////////////
 
-const exportarPDF = async () => {
-  const docPDF = new jsPDF();
-  const horaActual = new Date().toLocaleString("es-AR");
+  const exportarPDF = async () => {
+    const docPDF = new jsPDF();
+    const horaActual = new Date().toLocaleString("es-AR");
 
-  // Convertir imagen importada a base64
-  const logoBase64 = await getImageBase64(Logo);
+    // Convertir imagen importada a base64
+    const logoBase64 = await getImageBase64(Logo);
 
-  // Ajustar logo: (x, y, width, height)
-  const logoWidth = 20;
-  const logoHeight = 20;
-  const logoX = 10;
-  const logoY = 10;
+    // Ajustar logo: (x, y, width, height)
+    const logoWidth = 20;
+    const logoHeight = 20;
+    const logoX = 10;
+    const logoY = 10;
 
-  // Insertar logo en la esquina superior izquierda
-  docPDF.addImage(logoBase64, "PNG", logoX, logoY, logoWidth, logoHeight);
+    // Insertar logo en la esquina superior izquierda
+    docPDF.addImage(logoBase64, "PNG", logoX, logoY, logoWidth, logoHeight);
 
-  // Para centrar título y subtítulo, calculamos la mitad del ancho de página
-  const pageWidth = docPDF.internal.pageSize.getWidth();
-  const tituloY = logoY + 7;   // altura para el título
-  const subtituloY = tituloY + 8; // altura para el subtítulo
+    // Para centrar título y subtítulo, calculamos la mitad del ancho de página
+    const pageWidth = docPDF.internal.pageSize.getWidth();
+    const tituloY = logoY + 7;   // altura para el título
+    const subtituloY = tituloY + 8; // altura para el subtítulo
 
-  docPDF.setFontSize(14);
-  docPDF.text(`LUGAR: ${datosEvangelismo.lugarEvangelismo || 'Lugar no especificado'}`, pageWidth / 2, tituloY, { align: "center" });
+    docPDF.setFontSize(14);
+    docPDF.text(`LUGAR: ${datosEvangelismo.lugarEvangelismo || 'Lugar no especificado'}`, pageWidth / 2, tituloY, { align: "center" });
 
-  docPDF.setFontSize(12);
-  docPDF.text(`Evangelismo del ${fechaEvangelismo}`, pageWidth / 2, subtituloY, { align: "center" });
+    docPDF.setFontSize(12);
+    docPDF.text(`Evangelismo del ${fechaEvangelismo}`, pageWidth / 2, subtituloY, { align: "center" });
 
-  const body = personas.map((p) => [
-    p.nombre,
-    p.edad || "--",
-    p.telefono || "--",
-    p.direccion || "--",
-    p.pedidoOracion || "--",
-    p.nota || "--",
-  ]);
+    const body = personas.map((p) => [
+      p.nombre,
+      p.edad || "--",
+      p.telefono || "--",
+      p.direccion || "--",
+      p.pedidoOracion || "--",
+      p.nota || "--",
+    ]);
 
-  autoTable(docPDF, {
-    startY: logoY + logoHeight + 10, // iniciar debajo del logo
-    head: [["Nombre", "Edad", "Teléfono", "Dirección", "Pedido", "Nota"]],
-    body,
-    styles: {
-      halign: "center",  // centra texto en todas las celdas
-      fontSize: 10,
-    },
-    headStyles: {
-      fillColor: [0, 102, 204],
-      textColor: 255,
-      halign: "center",  // centra encabezados
-    },
-    margin: { left: 14, right: 14 },
+    autoTable(docPDF, {
+      startY: logoY + logoHeight + 10, // iniciar debajo del logo
+      head: [["Nombre", "Edad", "Teléfono", "Dirección", "Pedido", "Nota"]],
+      body,
+      styles: {
+        halign: "center",  // centra texto en todas las celdas
+        fontSize: 10,
+      },
+      headStyles: {
+        fillColor: [0, 102, 204],
+        textColor: 255,
+        halign: "center",  // centra encabezados
+      },
+      margin: { left: 14, right: 14 },
 
-    didDrawPage: (data) => {
-      const pageHeight = docPDF.internal.pageSize.height;
-      const baseY = pageHeight - 30;
+      didDrawPage: (data) => {
+        const pageHeight = docPDF.internal.pageSize.height;
+        const baseY = pageHeight - 30;
 
-      docPDF.setFontSize(12);
-      // Centramos los datos del evangelismo al final
-      docPDF.text(`Lugar de Evangelismo: ${datosEvangelismo.lugarEvangelismo || "-"}`, pageWidth / 2, baseY, { align: "center" });
-      docPDF.text(`Obreros: ${datosEvangelismo.cantObreros || 0}     -     Personas Oradas: ${datosEvangelismo.personasOradas || 0}`, pageWidth / 2, baseY + 6, { align: "center" });
-      docPDF.text(`Pedidos de Oración: ${datosEvangelismo.pedidosOracion || 0}     -     Decisiones: ${datosEvangelismo.decisiones || 0}`, pageWidth / 2, baseY + 12, { align: "center" });
-      docPDF.text(`Comentarios: ${datosEvangelismo.comentarios || "-"}`, pageWidth / 2, baseY + 18, { align: "center" });
+        docPDF.setFontSize(12);
+        // Centramos los datos del evangelismo al final
+        docPDF.text(`Lugar de Evangelismo: ${datosEvangelismo.lugarEvangelismo || "-"}`, pageWidth / 2, baseY, { align: "center" });
+        docPDF.text(`Obreros: ${datosEvangelismo.cantObreros || 0}     -     Personas Oradas: ${datosEvangelismo.personasOradas || 0}`, pageWidth / 2, baseY + 6, { align: "center" });
+        docPDF.text(`Pedidos de Oración: ${datosEvangelismo.pedidosOracion || 0}     -     Decisiones: ${datosEvangelismo.decisiones || 0}`, pageWidth / 2, baseY + 12, { align: "center" });
+        docPDF.text(`Comentarios: ${datosEvangelismo.comentarios || "-"}`, pageWidth / 2, baseY + 18, { align: "center" });
 
-      docPDF.setFontSize(8);
-      docPDF.text(`PDF generado el ${horaActual}`, 14, pageHeight - 10);
-    },
-  });
+        docPDF.setFontSize(8);
+        docPDF.text(`PDF generado el ${horaActual}`, 14, pageHeight - 10);
+      },
+    });
 
-  docPDF.save(`personas_${fechaEvangelismo}.pdf`);
-};
+    docPDF.save(`personas_${fechaEvangelismo}.pdf`);
+  };
 
 
 
@@ -236,12 +240,12 @@ const exportarPDF = async () => {
     <Container className="mt-4">
       <h3>{datosEvangelismo?.lugarEvangelismo || ''} - Evangelismo del {fechaEvangelismo}</h3>
 
-      <Button className="mb-3" onClick={abrirModalNuevo}>
-        Agregar Persona
+      <Button title="Agregar Personas" variant="success"  className="mb-3" onClick={abrirModalNuevo}>
+        Agregar <IoMdPersonAdd size={24} />
       </Button>
 
-      <Button variant="secondary" className="mb-3 ms-2" onClick={exportarPDF}>
-        Exportar a PDF
+      <Button title="Descargar PDF" variant="secondary" className="mb-3 ms-2" onClick={exportarPDF}>
+        Descargar <FaFileDownload size={24} />
       </Button>
 
       <Table striped bordered hover responsive>
@@ -266,20 +270,20 @@ const exportarPDF = async () => {
               <td>{p.pedidoOracion}</td>
               <td>{p.nota}</td>
               <td>
-                <Button
-                  variant="warning"
+                <Button title="Editar"
+                  variant="primary"
                   size="sm"
-                  className="me-2"
+                  className="mb-1"
                   onClick={() => abrirModalEditar(p)}
                 >
-                  Editar
-                </Button>
-                <Button
+                  <FaEdit size={18} />
+                </Button>{" "}
+                <Button title="Eliminar"
                   variant="danger"
                   size="sm"
                   onClick={() => eliminarPersona(p.id)}
                 >
-                  Eliminar
+                  <FaRegTrashAlt size={18} />
                 </Button>
               </td>
             </tr>

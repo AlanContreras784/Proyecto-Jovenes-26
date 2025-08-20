@@ -43,8 +43,6 @@ export function AuthProvider({ children }) {
             localStorage.removeItem('authToken');
             setUser(null);
             setAdmin(false)
-        }else{
-
         }
     });
 

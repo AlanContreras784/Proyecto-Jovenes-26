@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../contexts/AuthContext';
 import { useState } from "react";
-import { Alert, Button, Card, Container, Form } from "react-bootstrap";
+import { Alert, Button, Card, Container, FloatingLabel, Form } from "react-bootstrap";
 import { dispararSweetAlertBasico } from "../assets/SweetAlert";
 import { crearUsuarioEnFirebase, crearUsuario } from '../Auth/firebase';
 
@@ -91,7 +91,7 @@ function Registrarse() {
     <Container className="mt-5 mb-5 d-flex justify-content-center align-items-center" style={{ maxWidth: 400 }}>
       <Card className='shadow-lg' style={{ width: "24rem" }}>
         <Card.Body>
-          <Card.Title className="mb-3 text-center"><h2>Registrarse</h2></Card.Title>
+          <Card.Title className="mb-3 text-center"><h2>Regístrarse</h2></Card.Title>
           {error && <Alert variant="danger">{error}</Alert>}
 
           {/* Preview Imagen */}
@@ -107,43 +107,49 @@ function Registrarse() {
 
           <Form onSubmit={registrarUsuario}>
             <Form.Group className="mb-3 text-start">
-              <Form.Label>Imagen:</Form.Label>
+              <FloatingLabel controlId="floatingInput" label="Imagen:" className="mb-4">
               <Form.Control
+              placeholder='Imagen:'
                 type="file"
                 accept="image/*"
                 capture="environment"
                 name="foto"
                 onChange={handleImagenChange}
               />
+              </FloatingLabel>
             </Form.Group>
 
             <Form.Group className="mb-3 text-start">
-              <Form.Label>Email:</Form.Label>
-              <Form.Control value={email} type="email" onChange={(e) => setEmail(e.target.value)} required />
+              <FloatingLabel controlId="floatingInput" label="Email:" className="mb-4">
+              <Form.Control placeholder="Email:" value={email} type="email" onChange={(e) => setEmail(e.target.value)} required />
+              </FloatingLabel>
             </Form.Group>
 
             <Form.Group className="mb-3 text-start">
-              <Form.Label>Contraseña:</Form.Label>
-              <Form.Control value={password} type="password" onChange={(e) => setPassword(e.target.value)} required />
+              <FloatingLabel controlId="floatingInput" label="Contraseña:" className="mb-4">
+              <Form.Control placeholder='Contraseña:' value={password} type="password" onChange={(e) => setPassword(e.target.value)} required />
+              </FloatingLabel>
             </Form.Group>
 
             <Form.Group className="mb-3 text-start">
-              <Form.Label>Nombres:</Form.Label>
-              <Form.Control value={name} type="text" onChange={(e) => setName(e.target.value)} required />
+              <FloatingLabel controlId="floatingInput" label="Nombres:" className="mb-4">
+              <Form.Control placeholder='Nombres:' value={name} type="text" onChange={(e) => setName(e.target.value)} required />
+              </FloatingLabel>
             </Form.Group>
 
             <Form.Group className="mb-3 text-start">
-              <Form.Label>Edad:</Form.Label>
-              <Form.Control value={age} type="number" onChange={(e) => setAge(e.target.value)} />
+              <FloatingLabel controlId="floatingInput" label="Edad:" className="mb-4">
+              <Form.Control placeholder='Edad:' value={age} type="number" onChange={(e) => setAge(e.target.value)} />
+              </FloatingLabel>
             </Form.Group>
 
             <Form.Group className="mb-3 text-start">
-              <Form.Label>País:</Form.Label>
-              <Form.Control value={country} type="text" onChange={(e) => setCountry(e.target.value)} />
+              <FloatingLabel controlId="floatingInput" label="País:" className="mb-4">
+              <Form.Control placeholder='País:' value={country} type="text" onChange={(e) => setCountry(e.target.value)} />
+              </FloatingLabel>
             </Form.Group>
-
-            <Button className='mb-3 me-4' variant="primary" type='submit'>Registrarse</Button>
-            <Link to={'/'}><Button className="mb-3" variant='outline-primary'>Login</Button></Link>
+            <Button className='me-4 mb-3 w-100' variant="primary"  type='submit'>Registrarse</Button>
+            <span className='color-registro'>¿Ya tienes cuenta?</span><Link className='text-registro' to={'/'}> Inicia Sesión</Link>
           </Form>
         </Card.Body>
       </Card>
