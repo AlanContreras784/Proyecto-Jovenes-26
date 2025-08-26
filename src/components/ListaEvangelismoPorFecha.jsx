@@ -15,6 +15,13 @@ const ListaEvangelismoPorFecha = () => {
     return date.toLocaleDateString("es-AR", { year: 'numeric', month: 'long', day: 'numeric' });
   };
 
+   // ✅ Ordenar de más reciente a más antiguo
+  const evangelismoOrdenado = [...evangelismos].sort((a, b) => {
+    const fechaA = a.dia?.seconds ? new Date(a.dia.seconds * 1000) : new Date(a.dia);
+    const fechaB = b.dia?.seconds ? new Date(b.dia.seconds * 1000) : new Date(b.dia);
+    return fechaB - fechaA;
+  });
+
   return (
     <Container className="mt-4">
       <h3>Evangelismos por Día</h3>
@@ -26,7 +33,7 @@ const ListaEvangelismoPorFecha = () => {
           </tr>
         </thead>
         <tbody>
-          {evangelismos.map(e => (
+          {evangelismoOrdenado.map(e => (
             <tr key={e.id}>
               <td>{formatoFecha(e.dia)}</td>
               <td>
