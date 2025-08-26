@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, GoogleAuthProvider } from "firebase/auth";
 //import { getAnalytics } from "firebase/analytics";
 import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, getFirestore, setDoc, Timestamp, updateDoc } from "firebase/firestore";
 // TODO: Add SDKs for Firebase products that you want to use
@@ -51,6 +51,8 @@ export function crearUsuario(email, password){
                 const errorCode = error.code;
                 const errorMessage = error.message;
                 rej(error);
+                console.log(errorCode)
+                console.log(errorMessage)
                 // ..
             });
         })
@@ -75,7 +77,9 @@ export function loginEmailPass(email, password){
                 console.log(error.code, error.message)
                 const errorCode = error.code;
                 const errorMessage = error.message;
-                rej(error);
+                rej(error, errorMessage);
+                console.log(errorCode)
+                console.log(errorMessage)
             });
         }
     )
@@ -84,29 +88,29 @@ export function loginEmailPass(email, password){
 }
 
 auth.useDeviceLanguage()
-export function logearG(){
-    signInWithPopup(auth, provider)
-    .then((result) => {
-        console.log("test", result)
-        // This gives you a Google Access Token. You can use it to access the Google API.
-        const credential = GoogleAuthProvider.credentialFromResult(result);
-        const token = credential.accessToken;
-        // The signed-in user info.
-        const user = result.user;
-        // IdP data available using getAdditionalUserInfo(result)
-        // ...
-    }).catch((error) => {
-        console.log("test error", error )
-        // Handle Errors here.
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        // The email of the user's account used.
-        const email = error.customData.email;
-        // The AuthCredential type that was used.
-        const credential = GoogleAuthProvider.credentialFromError(error);
-        // ...
-    });
-}
+// export function logearG(){
+//     signInWithPopup(auth, provider)
+//     .then((result) => {
+//         console.log("test", result)
+//         // This gives you a Google Access Token. You can use it to access the Google API.
+//         const credential = GoogleAuthProvider.credentialFromResult(result);
+//         const token = credential.accessToken;
+//         // The signed-in user info.
+//         const user = result.user;
+//         // IdP data available using getAdditionalUserInfo(result)
+//         // ...
+//     }).catch((error) => {
+//         console.log("test error", error )
+//         // Handle Errors here.
+//         const errorCode = error.code;
+//         const errorMessage = error.message;
+//         // The email of the user's account used.
+//         const email = error.customData.email;
+//         // The AuthCredential type that was used.
+//         const credential = GoogleAuthProvider.credentialFromError(error);
+//         // ...
+//     });
+// }
 
 /////////////////////////////////////////////////////////////////
 ///////////////////// BASE DE DATOS FIRESTORE USUARIOS ////////////////
