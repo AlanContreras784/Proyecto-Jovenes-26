@@ -41,11 +41,13 @@ const CrudPersonas = () => {
   const [cargando, setCargando] = useState(false);
 
   useEffect(() => {
+    if (!evangelismoId) return;
     obtenerPersonas();
     obtenerFechaEvangelismo();
-  }, []);
+  }, [evangelismoId]);
 
   const obtenerPersonas = async () => {
+    if (!evangelismoId) return;
     const snap = await getDocs(
       collection(db, "evangelismo", evangelismoId, "personas")
     );
@@ -54,6 +56,7 @@ const CrudPersonas = () => {
   };
 
   const obtenerFechaEvangelismo = async () => {
+    if (!evangelismoId) return;
     const ref = doc(db, "evangelismo", evangelismoId);
     const snap = await getDoc(ref);
     if (snap.exists()) {
@@ -100,6 +103,7 @@ const CrudPersonas = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!evangelismoId) return;
     setCargando(true);
     try {
       if (editandoId) {
@@ -126,10 +130,12 @@ const CrudPersonas = () => {
       setCargando(false);
     } catch (e) {
       console.error("Error al guardar persona:", e);
+      setCargando(false);
     }
   };
 
   const eliminarPersona = async (id) => {
+    if (!evangelismoId) return;
     if (window.confirm("¿Seguro que quieres eliminar esta persona?")) {
       try {
         await deleteDoc(doc(db, "evangelismo", evangelismoId, "personas", id));
@@ -139,6 +145,16 @@ const CrudPersonas = () => {
       }
     }
   };
+
+  const handleCloseModal = () => setShowModal(false);
+
+  if (!evangelismoId) {
+    return (
+      <Container className="mt-4">
+        <p>Debe seleccionar un evangelismo válido para ver las personas.</p>
+      </Container>
+    );
+  }
 
   //////////////////////CONVERTIR LA IMAGEN DEL LOGO A BASE 64 PARA PODER IMPRIMIR////////////////////////
   const getImageBase64 = (url) => {
@@ -261,8 +277,8 @@ const CrudPersonas = () => {
           </tr>
         </thead>
         <tbody>
-          {personas.map((p) => (
-            <tr key={p.id}>
+          {personas.map((p, index) => (
+            <tr key={p.id || index}>
               <td>{p.nombre}</td>
               <td>{p.edad}</td>
               <td>{p.telefono}</td>
@@ -292,7 +308,7 @@ const CrudPersonas = () => {
       </Table>
 
       {/* Modal para crear o editar persona */}
-      <Modal animation={false} show={showModal} onHide={() => setShowModal(false)}>
+      <Modal animation={false} show={showModal} onHide={handleCloseModal}>
         <Modal.Header closeButton>
           <Modal.Title>{editandoId ? "Editar Persona" : "Agregar Persona"}</Modal.Title>
         </Modal.Header>
