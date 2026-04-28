@@ -292,7 +292,7 @@ const CrudPersonas = () => {
       </Table>
 
       {/* Modal para crear o editar persona */}
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
+      <Modal animation={false} show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>{editandoId ? "Editar Persona" : "Agregar Persona"}</Modal.Title>
         </Modal.Header>
