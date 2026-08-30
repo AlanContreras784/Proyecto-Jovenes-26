@@ -15,6 +15,15 @@ const Navegacion = () => {
     const navigate= useNavigate();
     const audioRef = useRef(null);
     const [sonando, setSonando] = useState(false);
+    const [showOffcanvas, setShowOffcanvas] = useState(false);
+
+    // Cierra el offcanvas SOLO cuando el usuario elige un link,
+    // en vez de dejar que collapseOnSelect lo cierre en el mismo
+    // tick en que react-router navega (esa carrera es la que
+    // dispara el insertBefore/NotFoundError).
+    function handleNavClick(){
+        setShowOffcanvas(false);
+    }
 
     const toggleAudio = () => {
         const audio = audioRef.current;
@@ -76,14 +85,16 @@ const Navegacion = () => {
     }
 
     function handleNavigateLogin(){
+        setShowOffcanvas(false);
         navigate('/login');
     }
 
     function handleLogout(){
+        setShowOffcanvas(false);
         logout();
     }
     return (
-        <Navbar collapseOnSelect expand='lg' className="fs-6 py-0" variant="ligth">
+        <Navbar expand='lg' className="fs-6 py-0" variant="ligth">
             <Container className="mt-1 mb-1" fluid>
                 <NavbarBrand   href="/listaEvangelismo"><img className="logo  me-auto" src={Logo} alt="" /></NavbarBrand>
                 <h1 className="px-1 fs-5">JOVENES + 26</h1>
@@ -101,13 +112,15 @@ const Navegacion = () => {
 
                 <audio ref={audioRef} src="/audio/Vykingo.mpeg" loop />
 
-                <NavbarToggle aria-controls={`offcanvasNavbar-expand-lg`} />
+                <NavbarToggle aria-controls={`offcanvasNavbar-expand-lg`} onClick={() => setShowOffcanvas(prev => !prev)} />
                 <NavbarOffcanvas
                 id={`offcanvasNavbar-expand-lg`}
                 aria-labelledby={`offcanvasNavbarLabel-expand-lg`}
                 placement="end"
                 backdrop='static'
                 className='ps-0 bg-OffCanvas'
+                show={showOffcanvas}
+                onHide={() => setShowOffcanvas(false)}
                 >
                     <OffcanvasHeader  closeButton>
                         <OffcanvasTitle id={`offcanvasNavbarLabel-expand-lg`} href="#home">
@@ -116,10 +129,10 @@ const Navegacion = () => {
                     </OffcanvasHeader>
                     <OffcanvasBody>
                         <Nav className="justify-content-end  flex-grow-1 pe-3">
-                        {user? <Nav.Link href="#"  as={Link} to={'/listaEvangelismo'}>Registros</Nav.Link>: <></>}
-                        { admin? <Nav.Link href="#" as={Link} to={'/admin/crud'} className=' nav-link'>Registrar Evangelismo</Nav.Link> : <></>}
-                        { admin? <Nav.Link href="#" as={Link} to={'/admin/usuarios'} className=' nav-link'>Usuarios</Nav.Link> : <></>}
-                        {admin? <Nav.Link href="#"  as={Link} to={'/personasfechas'}>Personas</Nav.Link>: <></>}
+                        {user? <Nav.Link href="#"  as={Link} to={'/listaEvangelismo'} onClick={handleNavClick}>Registros</Nav.Link>: <></>}
+                        { admin? <Nav.Link href="#" as={Link} to={'/admin/crud'} className=' nav-link' onClick={handleNavClick}>Registrar Evangelismo</Nav.Link> : <></>}
+                        { admin? <Nav.Link href="#" as={Link} to={'/admin/usuarios'} className=' nav-link' onClick={handleNavClick}>Usuarios</Nav.Link> : <></>}
+                        {admin? <Nav.Link href="#"  as={Link} to={'/personasfechas'} onClick={handleNavClick}>Personas</Nav.Link>: <></>}
                         <Nav.Item className='mx-0 ms-0'>
                           <Button
                             size="sm"

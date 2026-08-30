@@ -179,7 +179,7 @@ const CrudPersonas = () => {
 
       const data = {
         nombre: String(form.nombre || ""),
-        edad: Number(form.edad || 0),
+        edad: form.edad === "" ? null : Number(form.edad),
         telefono: String(form.telefono || ""),
         direccion: String(form.direccion || ""),
         pedidoOracion: String(form.pedidoOracion || ""),
@@ -325,7 +325,7 @@ const CrudPersonas = () => {
 
       const body = personas.map((p) => [
         String(p?.nombre || ""),
-        String(p?.edad || "--"),
+        String(p?.edad ?? ""),
         String(p?.telefono || "--"),
         String(p?.direccion || "--"),
         String(p?.pedidoOracion || "--"),
@@ -557,7 +557,6 @@ const CrudPersonas = () => {
                 name="edad"
                 value={form.edad}
                 onChange={handleChange}
-                required
               />
             </Form.Group>
 
