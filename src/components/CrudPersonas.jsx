@@ -301,18 +301,21 @@ const CrudPersonas = () => {
       const pageWidth = docPDF.internal.pageSize.getWidth();
 
       const tituloY = logoY + 7;
-      const subtituloY = tituloY + 8;
 
       docPDF.setFontSize(14);
 
-      docPDF.text(
+      // Si el lugar es largo, se parte en varias líneas dejando lugar al logo
+      const tituloLineas = docPDF.splitTextToSize(
         `LUGAR: ${String(
           datosEvangelismo?.lugarEvangelismo || "Lugar no especificado"
         )}`,
-        pageWidth / 2,
-        tituloY,
-        { align: "center" }
+        pageWidth - 70
       );
+
+      docPDF.text(tituloLineas, pageWidth / 2, tituloY, { align: "center" });
+
+      // El subtítulo baja según la cantidad de líneas del título
+      const subtituloY = tituloY + tituloLineas.length * 6 + 2;
 
       docPDF.setFontSize(12);
 
@@ -333,7 +336,7 @@ const CrudPersonas = () => {
       ]);
 
       autoTable(docPDF, {
-        startY: logoY + logoHeight + 10,
+        startY: Math.max(logoY + logoHeight + 10, subtituloY + 8),
 
         head: [
           [
@@ -359,57 +362,16 @@ const CrudPersonas = () => {
           halign: "center",
         },
 
+        // bottom reserva el espacio del resumen: la tabla salta de hoja antes de pisarlo
         margin: {
           left: 14,
           right: 14,
+          bottom: 40,
         },
 
+        // En cada hoja solo se repite la hora de generación
         didDrawPage: () => {
           const pageHeight = docPDF.internal.pageSize.height;
-
-          const baseY = pageHeight - 30;
-
-          docPDF.setFontSize(12);
-
-          docPDF.text(
-            `Lugar de Evangelismo: ${String(
-              datosEvangelismo?.lugarEvangelismo || "-"
-            )}`,
-            pageWidth / 2,
-            baseY,
-            { align: "center" }
-          );
-
-          docPDF.text(
-            `Obreros: ${String(
-              datosEvangelismo?.cantObreros || 0
-            )}     -     Personas Oradas: ${String(
-              datosEvangelismo?.personasOradas || 0
-            )}`,
-            pageWidth / 2,
-            baseY + 6,
-            { align: "center" }
-          );
-
-          docPDF.text(
-            `Pedidos de Oración: ${String(
-              datosEvangelismo?.pedidosOracion || 0
-            )}     -     Decisiones: ${String(
-              datosEvangelismo?.decisiones || 0
-            )}`,
-            pageWidth / 2,
-            baseY + 12,
-            { align: "center" }
-          );
-
-          docPDF.text(
-            `Comentarios: ${String(
-              datosEvangelismo?.comentarios || "-"
-            )}`,
-            pageWidth / 2,
-            baseY + 18,
-            { align: "center" }
-          );
 
           docPDF.setFontSize(8);
 
@@ -420,6 +382,54 @@ const CrudPersonas = () => {
           );
         },
       });
+
+      // Resumen solo en la última hoja, en la zona reservada por margin.bottom
+      docPDF.setPage(docPDF.getNumberOfPages());
+
+      const pageHeight = docPDF.internal.pageSize.height;
+      const baseY = pageHeight - 30;
+
+      docPDF.setFontSize(12);
+
+      docPDF.text(
+        `Lugar de Evangelismo: ${String(
+          datosEvangelismo?.lugarEvangelismo || "-"
+        )}`,
+        pageWidth / 2,
+        baseY,
+        { align: "center" }
+      );
+
+      docPDF.text(
+        `Obreros: ${String(
+          datosEvangelismo?.cantObreros || 0
+        )}     -     Personas Oradas: ${String(
+          datosEvangelismo?.personasOradas || 0
+        )}`,
+        pageWidth / 2,
+        baseY + 6,
+        { align: "center" }
+      );
+
+      docPDF.text(
+        `Pedidos de Oración: ${String(
+          datosEvangelismo?.pedidosOracion || 0
+        )}     -     Decisiones: ${String(
+          datosEvangelismo?.decisiones || 0
+        )}`,
+        pageWidth / 2,
+        baseY + 12,
+        { align: "center" }
+      );
+
+      docPDF.text(
+        `Comentarios: ${String(
+          datosEvangelismo?.comentarios || "-"
+        )}`,
+        pageWidth / 2,
+        baseY + 18,
+        { align: "center" }
+      );
 
       docPDF.save(
         `personas_${String(fechaEvangelismo || "evangelismo")}.pdf`
