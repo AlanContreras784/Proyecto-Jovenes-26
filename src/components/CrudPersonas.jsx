@@ -362,41 +362,35 @@ const CrudPersonas = () => {
           halign: "center",
         },
 
-        // bottom reserva el espacio del resumen: la tabla salta de hoja antes de pisarlo
+        // bottom deja lugar al pie de página (hora de generación y número)
         margin: {
           left: 14,
           right: 14,
-          bottom: 40,
-        },
-
-        // En cada hoja solo se repite la hora de generación
-        didDrawPage: () => {
-          const pageHeight = docPDF.internal.pageSize.height;
-
-          docPDF.setFontSize(8);
-
-          docPDF.text(
-            `PDF generado el ${horaActual}`,
-            14,
-            pageHeight - 10
-          );
+          bottom: 20,
         },
       });
 
-      // Resumen solo en la última hoja, en la zona reservada por margin.bottom
-      docPDF.setPage(docPDF.getNumberOfPages());
-
       const pageHeight = docPDF.internal.pageSize.height;
-      const baseY = pageHeight - 30;
+
+      // Resumen justo después de la última fila de la tabla
+      const alturaResumen = 30;
+      let y = docPDF.lastAutoTable.finalY + 12;
+
+      // Si el resumen no entra en lo que queda de la hoja, pasa a una nueva
+      if (y + alturaResumen > pageHeight - 20) {
+        docPDF.addPage();
+        y = 20;
+      }
 
       docPDF.setFontSize(12);
+      docPDF.setTextColor(0);
 
       docPDF.text(
         `Lugar de Evangelismo: ${String(
           datosEvangelismo?.lugarEvangelismo || "-"
         )}`,
         pageWidth / 2,
-        baseY,
+        y,
         { align: "center" }
       );
 
@@ -407,7 +401,7 @@ const CrudPersonas = () => {
           datosEvangelismo?.personasOradas || 0
         )}`,
         pageWidth / 2,
-        baseY + 6,
+        y + 6,
         { align: "center" }
       );
 
@@ -418,7 +412,7 @@ const CrudPersonas = () => {
           datosEvangelismo?.decisiones || 0
         )}`,
         pageWidth / 2,
-        baseY + 12,
+        y + 12,
         { align: "center" }
       );
 
@@ -427,9 +421,27 @@ const CrudPersonas = () => {
           datosEvangelismo?.comentarios || "-"
         )}`,
         pageWidth / 2,
-        baseY + 18,
+        y + 18,
         { align: "center" }
       );
+
+      // Pie de página en todas las hojas (incluida la que agregó el resumen)
+      const totalPaginas = docPDF.getNumberOfPages();
+
+      for (let i = 1; i <= totalPaginas; i++) {
+        docPDF.setPage(i);
+        docPDF.setFontSize(8);
+        docPDF.setTextColor(100);
+
+        docPDF.text(`PDF generado el ${horaActual}`, 14, pageHeight - 10);
+
+        docPDF.text(
+          `Página ${i} de ${totalPaginas}`,
+          pageWidth - 14,
+          pageHeight - 10,
+          { align: "right" }
+        );
+      }
 
       docPDF.save(
         `personas_${String(fechaEvangelismo || "evangelismo")}.pdf`

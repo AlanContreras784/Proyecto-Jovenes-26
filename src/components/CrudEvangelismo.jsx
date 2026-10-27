@@ -333,58 +333,66 @@ const CrudEvangelismo = () => {
       });
     }
 
-    // Tabla principal con registros
-  autoTable(doc, {
-    startY: logoY + logoHeight + 10,
-    head: [["Día","Lugar Evangelismo", "Obreros", "Personas Oradas", "Pedidos", "Decisiones", "Comentarios"]],
-    body: secciones,
-    styles: { 
-      fontSize: 10,
-      halign: "center"   // <-- centra contenido de todas las celdas
-    },
-    headStyles: {
-      fillColor: [0, 102, 204],
-      textColor: 255,
-      halign: "center",  // <-- centra encabezados
-    },
-    alternateRowStyles: { fillColor: [240, 240, 240] },
-    margin: { top: 35, bottom: 30 },
-    didDrawPage: (data) => {
-      // Agregar logo en cada página
+    // Encabezado (logo, título y subtítulos) + número de página.
+    // Se dibuja una sola vez por hoja, aunque lo llamen las dos tablas.
+    const paginasConEncabezado = new Set();
+
+    const dibujarEncabezado = (data) => {
+      if (paginasConEncabezado.has(data.pageNumber)) return;
+      paginasConEncabezado.add(data.pageNumber);
+
+      const anchoPagina = doc.internal.pageSize.getWidth();
+
       doc.addImage(logoBase64, "PNG", logoX, logoY, logoWidth, logoHeight);
 
-      // Título centrado
       doc.setFontSize(16);
       doc.setTextColor(0);
-      doc.text("Reporte de Evangelismos", doc.internal.pageSize.getWidth() / 2, tituloY, {
+      doc.text("Reporte de Evangelismos", anchoPagina / 2, tituloY, {
         align: "center",
       });
 
-      // Subtítulo con fecha de exportación
       doc.setFontSize(10);
       doc.setTextColor(100);
       doc.text(
         `EVANGELISMO  JOVENES+26 - MARTES Y VIERNES 17:30 Y 18:30HS `,
-        doc.internal.pageSize.getWidth() / 2,
+        anchoPagina / 2,
         subtituloY - 5,
         { align: "center" }
       );
-      doc.text(`Exportado el ${fechaHoraActual}`, doc.internal.pageSize.getWidth() / 2, subtituloY, {
+      doc.text(`Exportado el ${fechaHoraActual}`, anchoPagina / 2, subtituloY, {
         align: "center",
       });
 
-      // Número de página abajo a la derecha
-      const pageNumber = doc.internal.getNumberOfPages();
       doc.setFontSize(8);
       doc.setTextColor(150);
       doc.text(
-        `Página ${pageNumber}`,
-        doc.internal.pageSize.getWidth() - 20,
+        `Página ${data.pageNumber}`,
+        anchoPagina - 20,
         doc.internal.pageSize.getHeight() - 10
       );
-    },
-  });
+    };
 
+    // La tabla (y su encabezado azul) empieza debajo del logo en TODAS las hojas
+    const margenSuperior = logoY + logoHeight + 8; // 50 mm
+
+    // Tabla principal con registros
+    autoTable(doc, {
+      startY: margenSuperior + 2,
+      head: [["Día","Lugar Evangelismo", "Obreros", "Personas Oradas", "Pedidos", "Decisiones", "Comentarios"]],
+      body: secciones,
+      styles: {
+        fontSize: 10,
+        halign: "center"
+      },
+      headStyles: {
+        fillColor: [0, 102, 204],
+        textColor: 255,
+        halign: "center",
+      },
+      alternateRowStyles: { fillColor: [240, 240, 240] },
+      margin: { top: margenSuperior, bottom: 30 },
+      didDrawPage: dibujarEncabezado,
+    });
 
     // Tabla resumen mensual con totales
     const resumen = generarResumenMensual(registrosPorMes);
@@ -393,17 +401,18 @@ const CrudEvangelismo = () => {
       startY: doc.lastAutoTable.finalY + 10,
       head: [["Mes", "Total Obreros", "Total Oradas", "Total Pedidos", "Total Decisiones"]],
       body: resumen,
-      styles: { 
+      styles: {
         fontSize: 10,
-        halign: "center"   // <-- centrado horizontal de todos los datos
+        halign: "center"
       },
-      
       headStyles: {
         fillColor: [0, 153, 76],
         textColor: 255,
-        halign: "center",  // <-- centrado de encabezado
+        halign: "center",
       },
       alternateRowStyles: { fillColor: [240, 255, 240] },
+      margin: { top: margenSuperior, bottom: 30 },
+      didDrawPage: dibujarEncabezado,
     });
 
     doc.save("reporte_evangelismo.pdf");
@@ -570,4 +579,4 @@ const CrudEvangelismo = () => {
   );
 };
 
-export default CrudEvangelismo;
+export default CrudEvangelismo
